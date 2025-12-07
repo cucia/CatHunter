@@ -212,8 +212,8 @@ async def monitor_channel(token):
         try:
             async with httpx.AsyncClient() as client:
                 # Get recent messages
-                url = f"{API_BASE}/channels/{CHANNEL_ID}/messages?limit=10"
-                response = await client.get(url, headers=headers, timeout=10)
+                url = f"{API_BASE}/channels/{CHANNEL_ID}/messages?limit=2"
+                response = await client.get(url, headers=headers, timeout=5)
                 
                 if response.status_code == 200:
                     messages = response.json()
@@ -222,7 +222,7 @@ async def monitor_channel(token):
                     if last_message_id is None and messages:
                         last_message_id = int(messages[0]['id'])
                         logger.info(f"✅ Started tracking from message ID: {last_message_id}")
-                        await asyncio.sleep(2)
+                        await asyncio.sleep()
                         continue
                     
                     # Process messages in reverse order (oldest first)
@@ -246,10 +246,9 @@ async def monitor_channel(token):
                             
                             # Check if message contains the trigger text
                             if TRIGGER_TEXT.lower() in content.lower():
-                                logger.info("")
+                        
                                 logger.info("🐱🐱🐱 TRIGGER DETECTED! RESPONDING NOW! 🐱🐱🐱")
-                                logger.info(f"   Message: {content[:100]}")
-                                logger.info("")
+                                
                                 
                                 # Send response immediately
                                 await send_message(token, RESPONSE_MESSAGE)
@@ -262,7 +261,7 @@ async def monitor_channel(token):
             logger.error(f"⚠️  Error in monitoring: {e}")
         
         # Poll every 1 seconds
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.05)
 
 async def main():
     """Main automation"""
