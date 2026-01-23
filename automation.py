@@ -34,13 +34,26 @@ CAT_TYPES = [
 # Build cat config dictionary from environment
 CAT_CONFIG = {}
 for cat_type in CAT_TYPES:
-    env_key = f"CATCH_{cat_type.upper().replace('8BIT', 'EIGHTBIT')}"
-    delay_key = f"CATCH_{cat_type.upper().replace('8BIT', 'EIGHTBIT')}_DELAY"
+    env_base = cat_type.upper().replace('8BIT', 'EIGHTBIT')
+    env_key = f"CATCH_{env_base}"
+    delay_key = f"CATCH_{env_base}_DELAY"
+    jitter_key = f"CATCH_{env_base}_JITTER"
     
     enabled = os.getenv(env_key, 'true').lower() == 'true'  # Default: catch all
     delay = float(os.getenv(delay_key, str(RESPONSE_DELAY)))  # Default: use global delay
     
-    CAT_CONFIG[cat_type.lower()] = {'enabled': enabled, 'delay': delay}
+    # Per-cat jitter: use CATCH_<TYPE>_JITTER if set, else fall back to global JITTER_ENABLED
+    raw_jitter = os.getenv(jitter_key)
+    if raw_jitter is not None:
+        jitter_enabled = raw_jitter.lower() == 'true'
+    else:
+        jitter_enabled = JITTER_ENABLED
+    
+    CAT_CONFIG[cat_type.lower()] = {
+        'enabled': enabled,
+        'delay': delay,
+        'jitter_enabled': jitter_enabled
+    }
 
 # Validate CHANNEL_ID if provided
 try:
@@ -157,7 +170,14 @@ async def on_message(message: discord.Message):
         try:
             # Calculate delay with optional jitter
             delay = cat_delay
-            if JITTER_ENABLED and JITTER_MAX > 0:
+            
+            # Use per-cat jitter settings if available
+            if cat_type and cat_type.lower() in CAT_CONFIG:
+                jitter_enabled = CAT_CONFIG[cat_type.lower()]['jitter_enabled']
+            else:
+                jitter_enabled = JITTER_ENABLED
+            
+            if jitter_enabled and JITTER_MAX > 0:
                 jitter = random.uniform(0, JITTER_MAX)
                 delay = cat_delay + jitter
             

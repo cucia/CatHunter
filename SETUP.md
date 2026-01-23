@@ -107,27 +107,34 @@ Set `DEBUG_LOG_MESSAGES=true` to print detailed logs explaining why messages are
 
 ### Selective Cat Catching
 
-By default, the bot catches **all** cat types. You can filter to catch only specific types using `CATCH_CATS`:
+By default, the bot catches **all** cat types. You can enable/disable each cat and set a custom delay per type using `CATCH_<TYPE>` and `CATCH_<TYPE>_DELAY`. Optionally, enable jitter per type with `CATCH_<TYPE>_JITTER` (uses global `JITTER_MAX`).
 
+Examples:
 ```
-CATCH_CATS=Epic,Rare,Legendary,Mythic,Ultimate
-```
+# Disable common cats, prioritize rare
+CATCH_FINE=false
+CATCH_NICE=false
+CATCH_GOOD=false
+CATCH_RARE=true
 
-This will **only** catch Epic, Rare, Legendary, Mythic, and Ultimate cats, skipping all others.
+# Custom delay for Legendary and Mythic
+CATCH_LEGENDARY=true
+CATCH_LEGENDARY_DELAY=0.4
+CATCH_MYTHIC=true
+CATCH_MYTHIC_DELAY=0.5
+
+# No jitter for ultra-rare types, jitter for others
+CATCH_EIGHTBIT_JITTER=false
+CATCH_ULTIMATE_JITTER=false
+JITTER_ENABLED=true
+JITTER_MAX=0.3
+```
 
 Available cat types (by rarity):
 - **Common**: Fine (24.34%), Nice (18.26%), Good (12.17%), Rare (8.52%), Wild (6.69%), Baby (5.6%)
 - **Uncommon**: Epic (4.87%), Sus (4.26%), Brave (3.65%), Rickroll (3.04%), Reverse (2.43%)
 - **Rare**: Superior (1.95%), Trash (1.22%), Legendary (0.85%), Mythic (0.61%)
 - **Ultra Rare**: 8bit (0.49%), Corrupt (0.37%), Professor (0.24%), Divine (0.19%), Real (0.12%), Ultimate (0.07%), eGirl (0.05%)
-
-**Example:** To catch only ultra-rare and legendary cats:
-```
-CATCH_CATS=Legendary,Mythic,8bit,Corrupt,Professor,Divine,Real,Ultimate,eGirl
-```
-
-**Leave empty to catch all cats** (default behavior).
-
 ### Step 3: Build and Start
 
 ```bash
