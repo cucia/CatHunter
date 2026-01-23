@@ -105,6 +105,29 @@ This will respond between 0.5s and 1.0s randomly.
 
 Set `DEBUG_LOG_MESSAGES=true` to print detailed logs explaining why messages are ignored (wrong channel, wrong bot ID, no trigger match). Useful for diagnosing issues when the bot appears to be "stuck".
 
+### Selective Cat Catching
+
+By default, the bot catches **all** cat types. You can filter to catch only specific types using `CATCH_CATS`:
+
+```
+CATCH_CATS=Epic,Rare,Legendary,Mythic,Ultimate
+```
+
+This will **only** catch Epic, Rare, Legendary, Mythic, and Ultimate cats, skipping all others.
+
+Available cat types (by rarity):
+- **Common**: Fine (24.34%), Nice (18.26%), Good (12.17%), Rare (8.52%), Wild (6.69%), Baby (5.6%)
+- **Uncommon**: Epic (4.87%), Sus (4.26%), Brave (3.65%), Rickroll (3.04%), Reverse (2.43%)
+- **Rare**: Superior (1.95%), Trash (1.22%), Legendary (0.85%), Mythic (0.61%)
+- **Ultra Rare**: 8bit (0.49%), Corrupt (0.37%), Professor (0.24%), Divine (0.19%), Real (0.12%), Ultimate (0.07%), eGirl (0.05%)
+
+**Example:** To catch only ultra-rare and legendary cats:
+```
+CATCH_CATS=Legendary,Mythic,8bit,Corrupt,Professor,Divine,Real,Ultimate,eGirl
+```
+
+**Leave empty to catch all cats** (default behavior).
+
 ### Step 3: Build and Start
 
 ```bash

@@ -23,6 +23,25 @@ RESPONSE_DELAY = float(os.getenv('RESPONSE_DELAY', '0'))  # Delay in seconds bef
 JITTER_ENABLED = os.getenv('JITTER_ENABLED', 'false').lower() == 'true'  # Enable/disable jitter
 JITTER_MAX = float(os.getenv('JITTER_MAX', '0'))  # Max jitter time in seconds
 
+# Selective cat catching - individual enable/disable and custom delays per cat type
+CAT_TYPES = [
+    'Fine', 'Nice', 'Good', 'Rare', 'Wild', 'Baby', 'Epic', 'Sus',
+    'Brave', 'Rickroll', 'Reverse', 'Superior', 'Trash', 'Legendary',
+    'Mythic', '8bit', 'Corrupt', 'Professor', 'Divine', 'Real',
+    'Ultimate', 'eGirl'
+]
+
+# Build cat config dictionary from environment
+CAT_CONFIG = {}
+for cat_type in CAT_TYPES:
+    env_key = f"CATCH_{cat_type.upper().replace('8BIT', 'EIGHTBIT')}"
+    delay_key = f"CATCH_{cat_type.upper().replace('8BIT', 'EIGHTBIT')}_DELAY"
+    
+    enabled = os.getenv(env_key, 'true').lower() == 'true'  # Default: catch all
+    delay = float(os.getenv(delay_key, str(RESPONSE_DELAY)))  # Default: use global delay
+    
+    CAT_CONFIG[cat_type.lower()] = {'enabled': enabled, 'delay': delay}
+
 # Validate CHANNEL_ID if provided
 try:
     CHANNEL_ID = int(CHANNEL_ID) if CHANNEL_ID else None
@@ -61,6 +80,18 @@ async def on_ready():
         logger.info(f"🔎 Filter mode: BOT_USERNAME='{BOT_USERNAME}' (name match)")
     else:
         logger.info("🔎 Filter mode: Any bot messages (no specific bot configured)")
+    # Log catch mode
+    enabled_cats = [cat.title() for cat, config in CAT_CONFIG.items() if config['enabled']]
+    disabled_cats = [cat.title() for cat, config in CAT_CONFIG.items() if not config['enabled']]
+    
+    if len(enabled_cats) == len(CAT_CONFIG):
+        logger.info("🎯 Catch mode: ALL cats enabled")
+    elif len(enabled_cats) == 0:
+        logger.info("⚠️  Catch mode: NO cats enabled (bot will not respond)")
+    else:
+        logger.info(f"🎯 Catch mode: {len(enabled_cats)}/{len(CAT_CONFIG)} types enabled")
+        if len(disabled_cats) <= 10:
+            logger.info(f"   Disabled: {', '.join(disabled_cats)}")
 
 
 @client.event
@@ -100,13 +131,35 @@ async def on_message(message: discord.Message):
         preview = content.replace('\n', ' ')[:120]
         logger.debug(f"Candidate message from {message.author} (ID: {message.author.id}): '{preview}'")
 
+    # Extract cat type from message (e.g., "Nice cat has appeared!" -> "Nice")
+    cat_type = extract_cat_type(content)
+    
+    # Check if we should catch this type of cat
+    if cat_type:
+        cat_key = cat_type.lower()
+        if cat_key in CAT_CONFIG:
+            if not CAT_CONFIG[cat_key]['enabled']:
+                if DEBUG_LOG_MESSAGES:
+                    logger.debug(f"Skipping {cat_type} cat; CATCH_{cat_type.upper()}=false")
+                else:
+                    logger.info(f"⏭️  Skipped {cat_type} cat (disabled)")
+                return
+            # Use per-cat delay
+            cat_delay = CAT_CONFIG[cat_key]['delay']
+        else:
+            # Unknown cat type, use global delay
+            cat_delay = RESPONSE_DELAY
+    else:
+        # Couldn't determine cat type, use global delay
+        cat_delay = RESPONSE_DELAY
+
     if TRIGGER_TEXT.lower() in content.lower():
         try:
             # Calculate delay with optional jitter
-            delay = RESPONSE_DELAY
+            delay = cat_delay
             if JITTER_ENABLED and JITTER_MAX > 0:
                 jitter = random.uniform(0, JITTER_MAX)
-                delay = RESPONSE_DELAY + jitter
+                delay = cat_delay + jitter
             
             # Apply delay before sending response
             if delay > 0:
@@ -114,7 +167,7 @@ async def on_message(message: discord.Message):
                 await asyncio.sleep(delay)
             
             await message.channel.send(RESPONSE_MESSAGE)
-            logger.info(f"✅ Responded with '{RESPONSE_MESSAGE}' to trigger from {message.author} (ID: {message.author.id}) in #{message.channel}")
+            logger.info(f"✅ Caught {cat_type} cat! Responded with '{RESPONSE_MESSAGE}'")
             if not BOT_ID and BOT_USERNAME:
                 logger.info(f"📌 Detected spawner ID: {message.author.id}. Set BOT_ID={message.author.id} in .env and clear BOT_USERNAME to use ID-based filtering.")
         except Exception as e:
@@ -122,6 +175,15 @@ async def on_message(message: discord.Message):
     else:
         if DEBUG_LOG_MESSAGES:
             logger.debug("Trigger text not found in message; no action taken")
+
+
+def extract_cat_type(content: str) -> str:
+    """Extract cat type from message like 'Nice cat has appeared!' -> 'Nice'"""
+    for cat_type in CAT_TYPES:
+        if cat_type.lower() in content.lower():
+            return cat_type
+    
+    return None
 
 
 def run_bot():
