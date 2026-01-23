@@ -15,8 +15,8 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-COPY user_automation.py .
+COPY automation.py .
 
 RUN mkdir -p /app/logs
 
-CMD ["python", "user_automation.py"]
+CMD ["python", "automation.py"]

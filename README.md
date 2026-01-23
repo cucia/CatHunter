@@ -1,77 +1,117 @@
-# 🐱 Cat Catcher Automation - Complete Package
+# 🐱 Cat Catcher - Discord Self-Bot Automation
 
-**Automate your Discord account to catch cat images 24/7!**
+**Automate catching cats in Discord with a WebSocket-based self-bot!**
 
-## 📦 What's Inside
+## 📦 What's Included
 
-- ✅ Complete automation code
-- ✅ Docker setup (ready to deploy)
-- ✅ Automatic login (no token hunting!)
-- ✅ 24/7 monitoring
-- ✅ Full documentation
+- ✅ WebSocket-based automation (instant detection, no polling)
+- ✅ Docker-ready deployment
+- ✅ 24/7 monitoring with auto-restart
+- ✅ Full logging and documentation
+- ✅ Simple self-bot setup
 
-## 🚀 3-Step Setup
+## 📁 Project Structure
 
-1. **Create .env** in `cat_catcher_user/`:
-   ```
-   DISCORD_EMAIL=your_email@example.com
-   DISCORD_PASSWORD=your_password
-   TARGET_CHANNEL_ID=1395460222088253450
-   TARGET_SERVER_ID=1083346023470088232
-   ```
+```
+CatHunter/
+├── README.md              # This file
+├── SETUP.md               # Setup instructions
+├── automation.py          # Main bot code
+├── requirements.txt       # Python dependencies
+├── Dockerfile             # Docker container config
+├── docker-compose.yml     # Docker compose config
+├── .env.template          # Environment template
+├── .env                   # Your config (never commit!)
+└── .gitignore             # Git ignore rules
+```
 
-2. **Start Docker**:
-   ```bash
-   cd cat_catcher_user
-   docker-compose up -d
-   ```
+## ⚡ Quick Start (2 Minutes)
 
-3. **View Logs**:
-   ```bash
-   docker-compose logs -f
-   ```
+### 1. Create .env
 
-## 📊 Performance
+```bash
+cp .env.template .env
+```
 
-- Detection: < 1 second
-- Polling: Every 2 seconds
-- Faster than any human! 🏆
+Edit `.env`:
+```
+USER_TOKEN=your_user_token_here
+TARGET_CHANNEL_ID=123456789012345678
+BOT_ID=987654321098765432
+```
+
+### 2. Start
+
+```bash
+docker-compose up -d
+docker-compose logs -f
+```
+
+### 3. Watch for Success
+
+```
+✅ Connected to Discord as YourUsername
+🎯 Listening for triggers in channel ID: 123456789012345678
+```
 
 ## 🎯 How It Works
 
 ```
-Cat Bot posts image in #Cat-Play
-    ↓
-Your automation detects (2 sec poll)
-    ↓
-YOUR account responds "cat"
-    ↓
+Cat Bot posts message in channel
+        ↓
+Your bot receives instantly (WebSocket)
+        ↓
+YOUR bot responds "cat"
+        ↓
 YOU GET POINTS! 🏆
 ```
 
-## 📋 Documentation
-
-- **SETUP_INSTRUCTIONS.md** - Detailed setup
-- **QUICK_START.md** - Fast start guide
-- **cat_catcher_user/README.md** - Quick reference
-
 ## ✨ Features
 
-✅ Automatic login (email + password)
-✅ Token saved locally (fast startup)
-✅ 24/7 operation with auto-restart
-✅ Full logging with timestamps
-✅ Uses YOUR personal account
-✅ Simple Docker deployment
+✅ **WebSocket-based** - Instant message detection, no polling delays
+✅ **Self-bot support** - Works with user account tokens
+✅ **ID-based filtering** - Respond only to specific bot (by ID or name)
+✅ **Configurable delay & jitter** - Add random delays to avoid detection
+✅ **Docker-ready** - Deploy anywhere Docker runs
+✅ **24/7 operation** - Auto-restart on failure
+✅ **Full logging** - Track what's happening
+✅ **Customizable** - Trigger text, response message, delays via `.env`
 
-## 🎮 Commands
+## 🔒 Security
+
+✅ Sensitive data in `.env` (not in code)
+✅ `.env` is gitignored (never committed)
+✅ Uses Discord Gateway (official WebSocket)
+✅ ID-based filtering prevents impostors
+✅ No credentials stored permanently
+
+## ⚙️ Configuration
+
+Key environment variables:
+- `USER_TOKEN` — Your Discord user token
+- `BOT_ID` — Spawner bot ID (ID-based filtering, most secure)
+- `BOT_USERNAME` — Spawner bot name (fallback if no ID)
+- `RESPONSE_DELAY` — Delay in seconds before responding (default: 0)
+- `JITTER_ENABLED` — Add random jitter (true/false, default: false)
+- `JITTER_MAX` — Max random delay in seconds (default: 0)
+
+See [SETUP.md](SETUP.md) for full configuration guide.
+
+## 📖 Documentation
+
+See [SETUP.md](SETUP.md) for:
+- Complete setup instructions
+- Troubleshooting guide
+- How to get your user token
+- Docker commands reference
+
+## ⚠️ Warning
+
+Self-bots violate Discord's Terms of Service. Use at your own risk.
+
+## 🎮 Common Commands
 
 ```bash
-cd cat_catcher_user
-
-# Start
-docker-compose up -d
-
 # View logs
 docker-compose logs -f
 
@@ -80,26 +120,16 @@ docker-compose down
 
 # Restart
 docker-compose restart
+
+# Check status
+docker-compose ps
 ```
 
-## 🔒 Security
-
-✅ Credentials in .env (not in code)
-✅ .env is gitignored (never committed)
-✅ Token saved locally
-✅ Uses Discord official API
-
-## 🆘 Support
-
-Check the documentation files for:
-- Setup issues
-- Troubleshooting
-- Configuration options
-
-## 🎉 Ready?
+## 🚀 Ready?
 
 ```bash
-cd cat_catcher_user
+cp .env.template .env
+# Edit .env with your token and settings
 docker-compose up -d
 ```
 
